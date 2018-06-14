@@ -118,14 +118,13 @@ int main(int argc, char *argv[])
 
     #define SECTORS_PER_FAT 9
     #define SECTORS_COUNT   2880
-    #define DIRENTS         224
     #define NUMBER_OF_FATS  2
 
     boot.sector_size=DEFAULT_SECTOR_SIZE;
     boot.sectors_per_cluster=1;
     boot.reserved_sector_count=1;
     boot.number_of_fats=NUMBER_OF_FATS;
-    boot.number_of_dirents=DIRENTS;
+    boot.number_of_dirents=224;
     boot.sector_count=SECTORS_COUNT;
     boot.media_type=0xf0;
     boot.fat_size_sectors=SECTORS_PER_FAT;
