@@ -26,7 +26,7 @@ int fd_read(int sector_number, char *buffer){
     if (len != bps){
         /* error handling here */
         printf("\nERROR:  in fd_read\n");
-        exit(1)
+        exit(1);
     }
     return len;
 }
