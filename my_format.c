@@ -55,6 +55,9 @@ int fd_write(int sector_number, char *buffer){
     return len;
 }
 
+#define SECTORS_PER_FAT 9
+#define SECTORS_COUNT   2880
+#define NUMBER_OF_FATS  2
 
 int main(int argc, char *argv[])
 {
@@ -107,18 +110,19 @@ int main(int argc, char *argv[])
         printf("nheads: %d\n", boot.nheads);
         printf("sectors_hidden: %d\n", boot.sectors_hidden);
         printf("sector_count_large: %d\n", boot.sector_count_large);
+
+        printf("oem_id: ");
+        for(int i = 0; i < 8; i++) {
+           printf("%d", boot.oem_id[i]);
+        }
+        printf("\n");
     }
     */
 
     // Step 1. initialize boot sector
-    char oemId[8] = {"EB0090"};
-    for(int i=0;i<8;i++) {
-        boot.oem_id[i]=oemId[i];
+    for(int i=0;i < 8; i++) {
+        boot.oem_id[i] = 0;
     }
-
-    #define SECTORS_PER_FAT 9
-    #define SECTORS_COUNT   2880
-    #define NUMBER_OF_FATS  2
 
     boot.sector_size=DEFAULT_SECTOR_SIZE;
     boot.sectors_per_cluster=1;
@@ -150,9 +154,13 @@ int main(int argc, char *argv[])
     int firstSectorOfFat1 = 1;
     int lastSectorOfFat2  = NUMBER_OF_FATS * SECTORS_PER_FAT;
 
+    //printf("firstSectorOfFat1: %d\n", firstSectorOfFat1);
+    //printf("lastSectorOfFat2: %d\n", lastSectorOfFat2);
+
     for (int sectorIdx = firstSectorOfFat1;
              sectorIdx <= lastSectorOfFat2; sectorIdx++) {
         if ((sectorIdx % SECTORS_PER_FAT) == 1) {
+            //printf("sectorIdx: %d\n", sectorIdx);
             fd_write(sectorIdx, bufReserved);  // fat 1/2 first entry in first sector - reserved
         } else {
             fd_write(sectorIdx, bufZero); // zeroing rest of fat 1/2
@@ -165,7 +173,10 @@ int main(int argc, char *argv[])
   // unformat operation. However, school solution simply zeros dentries.
 
     int firstSectorOfDirEntry1   = lastSectorOfFat2 + 1;
-    int lastSectorOfLastDirEntry = firstSectorOfDirEntry1 + 14;
+    int lastSectorOfLastDirEntry = firstSectorOfDirEntry1 + 13;
+
+    //printf("firstSectorOfDirEntry1: %d\n", firstSectorOfDirEntry1);
+    //printf("lastSectorOfLastDirEntry: %d\n", lastSectorOfLastDirEntry);
 
     for (int sectorIdx = firstSectorOfDirEntry1;
              sectorIdx <= lastSectorOfLastDirEntry; sectorIdx++) {
@@ -175,6 +186,10 @@ int main(int argc, char *argv[])
   // untouched. What are the pros/cons?)
 
     int firstSectorOfData = lastSectorOfLastDirEntry + 1;
+
+    //printf("firstSectorOfData: %d\n", firstSectorOfData);
+    //printf("SECTORS_COUNT: %d\n", SECTORS_COUNT);
+
     for (int sectorIdx = firstSectorOfData;
              sectorIdx < SECTORS_COUNT; sectorIdx++) {
         fd_write(sectorIdx, bufZero);
